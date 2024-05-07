@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const buttons = document.querySelector(".inputs");
 
   // Define variables
-  let currentExpression = ""; // Current calculator expression
-
+  let currentExpression = "0"; // Current calculator expression
+  let isDotIn = false;
   // Function to update displayed result
   function updateResult() {
     resultDisplay.value = currentExpression;
@@ -24,27 +24,29 @@ document.addEventListener("DOMContentLoaded", function () {
           const result = eval(currentExpression); // Use eval to calculate result
           if (Number.isInteger(result)) {
             currentExpression = result.toString();
+            isDotIn = false;
           } else {
             currentExpression = result.toFixed(10).toString();
           }
-          // Update expression to result
-          updateResult();
         } catch (error) {
           currentExpression = ""; // Clear expression in case of error
-          updateResult();
         }
       }
     } // Handling numbers
 
     // Handling "C" button (clear)
     else if (buttonText === "C") {
-      currentExpression = "";
+      currentExpression = "0";
+      isDotIn = false;
     }
 
     // Handling other buttons (numbers and operators)
     else if (buttonText === "<X") {
       if (currentExpression) {
         const arr = currentExpression.toString().split("");
+        if (arr[arr.length - 1] === ".") {
+          isDotIn = false;
+        }
         arr.pop();
         currentExpression = arr.join("");
       }
@@ -59,16 +61,21 @@ document.addEventListener("DOMContentLoaded", function () {
       const arr = currentExpression.split("");
       if (!isNaN(arr[arr.length - 1])) {
         currentExpression += buttonText;
+        isDotIn = false;
       } else {
         e.preventDefault();
       }
     } else if (buttonText === ".") {
-      if (currentExpression.toString().includes(".")) {
-        e.preventDefault();
-      } else {
+      if (!isDotIn) {
         currentExpression += buttonText;
+      } else {
+        e.preventDefault();
       }
+      isDotIn = true;
     } else if (e.target.tagName === "BUTTON") {
+      if (currentExpression[0] === "0" && currentExpression[1] !== ".") {
+        currentExpression = currentExpression.substring(1);
+      }
       currentExpression += buttonText;
     }
     // Update displayed result
